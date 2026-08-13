@@ -1,0 +1,18 @@
+# Environment variables
+.env
+backend/.env
+
+# Python virtual environments
+venv/
+backend/venv/
+
+# Node
+frontend/node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Uploaded files
+uploads/
+uploaded_files/
