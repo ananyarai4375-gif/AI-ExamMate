@@ -7,6 +7,23 @@ function QuestionCard({ question, material }) {
   const [result, setResult] = useState(null);
 
   // ============================================================
+  // CLEAN AI TEXT
+  // Removes unnecessary markdown characters such as **
+  // without changing the actual content.
+  // ============================================================
+
+  const cleanText = (text) => {
+    if (!text) return "";
+
+    return String(text)
+      .replace(/\*\*/g, "")
+      .replace(/__/g, "")
+      .replace(/^#+\s*/gm, "")
+      .replace(/^[-*]\s+/gm, "• ")
+      .trim();
+  };
+
+  // ============================================================
   // COMMON API ERROR HANDLER
   // ============================================================
 
@@ -66,9 +83,9 @@ function QuestionCard({ question, material }) {
       setResult({
         type: "easier",
         title: "Easier Version",
-        content: data.result.simple_question,
-        explanation: data.result.simple_explanation,
-        keyPoints: data.result.key_points || [],
+        content: cleanText(data.result.simple_question),
+        explanation: cleanText(data.result.simple_explanation),
+        keyPoints: (data.result.key_points || []).map(cleanText),
       });
     } catch (error) {
       console.error("Make Easier Error:", error);
@@ -122,9 +139,9 @@ function QuestionCard({ question, material }) {
       setResult({
         type: "explain",
         title: "Explanation",
-        content: data.result.explanation,
-        concepts: data.result.key_concepts || [],
-        example: data.result.example || "",
+        content: cleanText(data.result.explanation),
+        concepts: (data.result.key_concepts || []).map(cleanText),
+        example: cleanText(data.result.example || ""),
       });
     } catch (error) {
       console.error("Explain Question Error:", error);
@@ -150,15 +167,6 @@ function QuestionCard({ question, material }) {
     setResult(null);
 
     try {
-      /*
-       * IMPORTANT:
-       * Use the marks already assigned to this question.
-       *
-       * Example:
-       * question.marks = 7
-       * Then Exam Answer automatically generates a 7-mark answer.
-       */
-
       const selectedMarks = Number(question.marks);
 
       if (!selectedMarks) {
@@ -208,9 +216,10 @@ function QuestionCard({ question, material }) {
       setResult({
         type: "answer",
         title: `${data.result.marks}-Mark Exam Answer`,
-        content: data.result.answer,
-        keyPoints:
-          data.result.key_points_to_remember || [],
+        content: cleanText(data.result.answer),
+        keyPoints: (
+          data.result.key_points_to_remember || []
+        ).map(cleanText),
       });
     } catch (error) {
       console.error("Exam Answer Error:", error);
@@ -287,7 +296,6 @@ function QuestionCard({ question, material }) {
       {/* ACTIONS */}
       <div className="question-actions">
 
-        {/* MAKE EASIER */}
         <button
           type="button"
           onClick={makeEasier}
@@ -298,7 +306,6 @@ function QuestionCard({ question, material }) {
             : "Make Easier"}
         </button>
 
-        {/* EXPLAIN */}
         <button
           type="button"
           onClick={explainQuestion}
@@ -309,7 +316,6 @@ function QuestionCard({ question, material }) {
             : "Explain"}
         </button>
 
-        {/* EXAM ANSWER */}
         <button
           type="button"
           onClick={generateExamAnswer}
