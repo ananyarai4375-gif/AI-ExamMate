@@ -20,7 +20,7 @@ function Dashboard() {
     return null;
   }
 
-  const analysis = data.result;
+  const analysis = data.result.result;
 
   return (
     <main className="page dashboard">
