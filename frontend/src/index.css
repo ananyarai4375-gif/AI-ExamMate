@@ -1990,3 +1990,60 @@ a {
     justify-content: flex-end;
   }
 }
+/* =========================================================
+   FINAL DASHBOARD TEXT VISIBILITY FIX
+========================================================= */
+
+.dashboard .topic-card {
+  background: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+.dashboard .topic-card h3 {
+  color: #1f2937 !important;
+}
+
+.dashboard .topic-card p {
+  color: #6b7280 !important;
+}
+
+.dashboard .topic-card .topic-number {
+  color: #6366f1 !important;
+}
+
+.dashboard .topic-card svg {
+  color: #6366f1 !important;
+}
+
+/* Revision Notes */
+.dashboard .content-panel {
+  color: #1f2937;
+}
+
+.dashboard .note-item p {
+  color: #374151 !important;
+}
+
+.dashboard .note-item > span {
+  color: #6366f1 !important;
+  background: #eef2ff !important;
+}
+
+/* Study Plan */
+.dashboard .study-day h3 {
+  color: #1f2937 !important;
+}
+
+.dashboard .study-day li {
+  color: #4b5563 !important;
+}
+
+.dashboard .study-day-number {
+  color: #6366f1 !important;
+}
+
+/* Dashboard headings */
+.dashboard .section-heading h2,
+.dashboard .content-panel h2 {
+  color: #1f2937 !important;
+}
