@@ -32,69 +32,31 @@ function Dashboard() {
         study_plan: []
       }
     }
-
-    Depending on the frontend response,
-    the actual analysis may be inside:
-    data.result.result
-    or
-    data.result
   */
 
-  const analysis = data.result?.result || data.result;
-
-  // -----------------------------------------
-  // SAFETY CHECK
-  // -----------------------------------------
-
-  if (!analysis) {
-    return (
-      <main className="page dashboard">
-        <div className="content-panel">
-          <h2>Analysis data unavailable</h2>
-
-          <p>
-            The material was analyzed, but the analysis result
-            could not be loaded.
-          </p>
-
-          <button
-            className="primary-btn"
-            onClick={() => navigate("/upload")}
-          >
-            Try Again
-            <ArrowRight size={18} />
-          </button>
-        </div>
-      </main>
-    );
-  }
+  const analysis =
+    data?.result?.result ||
+    data?.result ||
+    data;
 
   // -----------------------------------------
   // SAFE API DATA
   // -----------------------------------------
 
   const importantTopics = Array.isArray(
-    analysis.important_topics
+    analysis?.important_topics
   )
     ? analysis.important_topics
     : [];
 
   const revisionNotes = Array.isArray(
-    analysis.revision_notes
+    analysis?.revision_notes
   )
     ? analysis.revision_notes
     : [];
 
-  const studyPlan = Array.isArray(
-    analysis.study_plan
-  )
-    ? analysis.study_plan
-    : [];
-  console.log("STUDY PLAN FROM API:", studyPlan);
-  console.log("FIRST STUDY PLAN ITEM:", studyPlan[0]);
-
   const mcqQuiz = Array.isArray(
-    analysis.mcq_quiz
+    analysis?.mcq_quiz
   )
     ? analysis.mcq_quiz
     : [];
@@ -106,11 +68,6 @@ function Dashboard() {
   console.log(
     "FULL ANALYSIS FROM API:",
     analysis
-  );
-
-  console.log(
-    "STUDY PLAN FROM API:",
-    studyPlan
   );
 
   // -----------------------------------------
@@ -134,7 +91,7 @@ function Dashboard() {
           </span>
 
           <h1>
-            {data.subject || "Study Material"}
+            {data?.subject || "Study Material"}
           </h1>
 
           <p>
@@ -179,7 +136,7 @@ function Dashboard() {
             </span>
 
             <strong>
-              {data.examDate || "Not specified"}
+              {data?.examDate || "Not specified"}
             </strong>
 
           </div>
@@ -200,7 +157,7 @@ function Dashboard() {
             </span>
 
             <strong>
-              {data.dailyHours || "0"} hours
+              {data?.dailyHours || "0"} hours
             </strong>
 
           </div>
@@ -221,7 +178,7 @@ function Dashboard() {
             </span>
 
             <strong>
-              {data.file?.name || "Uploaded material"}
+              {data?.file?.name || "Uploaded material"}
             </strong>
 
           </div>
@@ -261,21 +218,28 @@ function Dashboard() {
             importantTopics.map(
               (topic, index) => {
 
-                let topicText;
+                let topicText = "Important Topic";
 
                 if (typeof topic === "string") {
+
                   topicText = topic;
+
                 } else if (topic?.topic) {
+
                   topicText = topic.topic;
+
                 } else if (topic?.title) {
+
                   topicText = topic.title;
+
                 } else if (topic?.name) {
+
                   topicText = topic.name;
-                } else {
-                  topicText = "Important Topic";
+
                 }
 
                 return (
+
                   <div
                     key={index}
                     className="topic-card"
@@ -290,7 +254,9 @@ function Dashboard() {
                     </h3>
 
                   </div>
+
                 );
+
               }
             )
 
@@ -312,15 +278,10 @@ function Dashboard() {
 
 
       {/* =====================================================
-          REVISION NOTES + STUDY PLAN
+          REVISION NOTES
       ===================================================== */}
 
-      <section className="content-grid">
-
-
-        {/* =================================================
-            REVISION NOTES
-        ================================================= */}
+      <section className="section">
 
         <div className="content-panel">
 
@@ -340,21 +301,28 @@ function Dashboard() {
               revisionNotes.map(
                 (note, index) => {
 
-                  let noteText;
+                  let noteText = "Revision point";
 
                   if (typeof note === "string") {
+
                     noteText = note;
+
                   } else if (note?.note) {
+
                     noteText = note.note;
+
                   } else if (note?.text) {
+
                     noteText = note.text;
+
                   } else if (note?.content) {
+
                     noteText = note.content;
-                  } else {
-                    noteText = "Revision point";
+
                   }
 
                   return (
+
                     <div
                       className="note-item"
                       key={index}
@@ -369,7 +337,9 @@ function Dashboard() {
                       </p>
 
                     </div>
+
                   );
+
                 }
               )
 
@@ -377,198 +347,6 @@ function Dashboard() {
 
               <p>
                 No revision notes available.
-              </p>
-
-            )}
-
-          </div>
-
-        </div>
-
-
-        {/* =================================================
-            STUDY PLAN
-        ================================================= */}
-
-        <div className="content-panel">
-
-          <span className="section-label">
-            03
-          </span>
-
-          <h2>
-            Study Plan
-          </h2>
-
-
-          <div className="plan-list">
-
-            {studyPlan.length > 0 ? (
-
-              studyPlan.map(
-                (day, index) => {
-
-                  /*
-                    The backend may return:
-
-                    {
-                      day: 1,
-                      topics: ["Topic A", "Topic B"],
-                      hours: 2
-                    }
-
-                    OR:
-
-                    {
-                      day: "Day 1",
-                      topics: [...],
-                      hours: 2
-                    }
-
-                    OR slightly different key names.
-
-                    We handle all of them here.
-                  */
-
-
-                  // -------------------------------
-                  // DAY
-                  // -------------------------------
-
-                  const dayValue =
-                    day?.day ??
-                    day?.day_number ??
-                    day?.dayNumber ??
-                    index + 1;
-
-
-                  // -------------------------------
-                  // TOPICS
-                  // -------------------------------
-
-                  let topics = [];
-
-                  if (
-                    Array.isArray(day?.topics)
-                  ) {
-                    topics = day.topics;
-                  } else if (
-                    Array.isArray(day?.subjects)
-                  ) {
-                    topics = day.subjects;
-                  } else if (
-                    Array.isArray(day?.content)
-                  ) {
-                    topics = day.content;
-                  }
-
-
-                  // -------------------------------
-                  // HOURS
-                  // -------------------------------
-
-                  const hours =
-                    day?.hours ??
-                    day?.study_hours ??
-                    day?.studyHours ??
-                    day?.duration ??
-                    "";
-
-
-                  // -------------------------------
-                  // TOPIC TEXT
-                  // -------------------------------
-
-                  const topicText =
-                    topics
-                      .map((topic) => {
-
-                        if (
-                          typeof topic === "string"
-                        ) {
-                          return topic;
-                        }
-
-                        if (topic?.topic) {
-                          return topic.topic;
-                        }
-
-                        if (topic?.title) {
-                          return topic.title;
-                        }
-
-                        if (topic?.name) {
-                          return topic.name;
-                        }
-
-                        return "";
-
-                      })
-                      .filter(Boolean)
-                      .join(" • ");
-
-
-                  return (
-
-                    <div
-                      className="plan-item"
-                      key={index}
-                    >
-
-                      {/* DAY NUMBER */}
-
-                      <div className="day-number">
-
-                        {index + 1}
-
-                      </div>
-
-
-                      {/* DAY CONTENT */}
-
-                      <div className="plan-content">
-
-                        <strong>
-
-                          {typeof dayValue === "string"
-                            ? dayValue
-                            : `Day ${dayValue}`}
-
-                        </strong>
-
-
-                        {topicText && (
-
-                          <p>
-                            {topicText}
-                          </p>
-
-                        )}
-
-                      </div>
-
-
-                      {/* HOURS */}
-
-                      {hours !== "" && (
-
-                        <span>
-                          {hours}h
-                        </span>
-
-                      )}
-
-                    </div>
-
-                  );
-
-                }
-              )
-
-            ) : (
-
-              <p>
-                No study plan available.
               </p>
 
             )}
@@ -587,7 +365,7 @@ function Dashboard() {
       <section className="content-panel mcq-panel">
 
         <span className="section-label">
-          04
+          03
         </span>
 
         <h2>
