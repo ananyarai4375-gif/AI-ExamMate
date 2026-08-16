@@ -7,34 +7,45 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import TopicCard from "../components/TopicCard";
-
 function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const data = location.state;
 
+  // If dashboard is opened directly without analysis data
   if (!data) {
     navigate("/upload");
     return null;
   }
 
-  // API response structure:
-  // data.result = {
-  //   status: "success",
-  //   result: {
-  //     important_topics: [],
-  //     practice_questions: [],
-  //     revision_notes: [],
-  //     mcq_quiz: [],
-  //     study_plan: []
-  //   }
-  // }
+  /*
+    API response structure:
 
-  const analysis = data.result?.result;
+    {
+      status: "success",
+      result: {
+        important_topics: [],
+        practice_questions: [],
+        revision_notes: [],
+        mcq_quiz: [],
+        study_plan: []
+      }
+    }
 
-  // Safety check
+    Depending on the frontend response,
+    the actual analysis may be inside:
+    data.result.result
+    or
+    data.result
+  */
+
+  const analysis = data.result?.result || data.result;
+
+  // -----------------------------------------
+  // SAFETY CHECK
+  // -----------------------------------------
+
   if (!analysis) {
     return (
       <main className="page dashboard">
@@ -58,6 +69,10 @@ function Dashboard() {
     );
   }
 
+  // -----------------------------------------
+  // SAFE API DATA
+  // -----------------------------------------
+
   const importantTopics = Array.isArray(
     analysis.important_topics
   )
@@ -75,6 +90,7 @@ function Dashboard() {
   )
     ? analysis.study_plan
     : [];
+  console.log("STUDY PLAN FROM API:", studyPlan);
 
   const mcqQuiz = Array.isArray(
     analysis.mcq_quiz
@@ -82,22 +98,48 @@ function Dashboard() {
     ? analysis.mcq_quiz
     : [];
 
+  // -----------------------------------------
+  // DEBUG
+  // -----------------------------------------
+
+  console.log(
+    "FULL ANALYSIS FROM API:",
+    analysis
+  );
+
+  console.log(
+    "STUDY PLAN FROM API:",
+    studyPlan
+  );
+
+  // -----------------------------------------
+  // PAGE
+  // -----------------------------------------
+
   return (
     <main className="page dashboard">
 
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <div className="dashboard-header">
+
         <div>
+
           <span className="eyebrow">
             <BookOpen size={16} />
             AI Analysis Complete
           </span>
 
-          <h1>{data.subject}</h1>
+          <h1>
+            {data.subject || "Study Material"}
+          </h1>
 
           <p>
             Here's what AI found in your uploaded study material.
           </p>
+
         </div>
 
         <button
@@ -109,57 +151,95 @@ function Dashboard() {
           }
         >
           Generate Questions
+
           <ArrowRight size={18} />
+
         </button>
+
       </div>
 
 
-      {/* INFO CARDS */}
+      {/* =====================================================
+          INFO CARDS
+      ===================================================== */}
+
       <div className="info-row">
 
+        {/* EXAM DATE */}
+
         <div className="info-card">
+
           <CalendarDays size={20} />
 
           <div>
-            <span>Exam Date</span>
-            <strong>{data.examDate}</strong>
+
+            <span>
+              Exam Date
+            </span>
+
+            <strong>
+              {data.examDate || "Not specified"}
+            </strong>
+
           </div>
+
         </div>
 
 
+        {/* DAILY STUDY */}
+
         <div className="info-card">
+
           <Clock3 size={20} />
 
           <div>
-            <span>Daily Study</span>
+
+            <span>
+              Daily Study
+            </span>
+
             <strong>
-              {data.dailyHours} hours
+              {data.dailyHours || "0"} hours
             </strong>
+
           </div>
+
         </div>
 
 
+        {/* MATERIAL */}
+
         <div className="info-card">
+
           <FileQuestion size={20} />
 
           <div>
-            <span>Material</span>
+
+            <span>
+              Material
+            </span>
 
             <strong>
               {data.file?.name || "Uploaded material"}
             </strong>
+
           </div>
+
         </div>
 
       </div>
 
 
-      {/* IMPORTANT TOPICS */}
+      {/* =====================================================
+          IMPORTANT TOPICS
+      ===================================================== */}
+
       <section className="section">
 
         <div className="section-heading">
 
           <div>
+
             <span className="section-label">
               01
             </span>
@@ -167,27 +247,80 @@ function Dashboard() {
             <h2>
               Important Topics
             </h2>
+
           </div>
 
         </div>
 
 
         <div className="topic-grid">
-  {importantTopics.map((topic, index) => (
-    <div key={index} className="content-panel">
-      <strong>{topic}</strong>
-    </div>
-  ))}
-</div>
+
+          {importantTopics.length > 0 ? (
+
+            importantTopics.map(
+              (topic, index) => {
+
+                let topicText;
+
+                if (typeof topic === "string") {
+                  topicText = topic;
+                } else if (topic?.topic) {
+                  topicText = topic.topic;
+                } else if (topic?.title) {
+                  topicText = topic.title;
+                } else if (topic?.name) {
+                  topicText = topic.name;
+                } else {
+                  topicText = "Important Topic";
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className="topic-card"
+                  >
+
+                    <div className="topic-number">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+
+                    <h3>
+                      {topicText}
+                    </h3>
+
+                  </div>
+                );
+              }
+            )
+
+          ) : (
+
+            <div className="content-panel">
+
+              <p>
+                No important topics found.
+              </p>
+
+            </div>
+
+          )}
+
+        </div>
 
       </section>
 
 
-      {/* REVISION NOTES + STUDY PLAN */}
+      {/* =====================================================
+          REVISION NOTES + STUDY PLAN
+      ===================================================== */}
+
       <section className="content-grid">
 
 
-        {/* REVISION NOTES */}
+        {/* =================================================
+            REVISION NOTES
+        ================================================= */}
+
         <div className="content-panel">
 
           <span className="section-label">
@@ -201,25 +334,50 @@ function Dashboard() {
 
           <div className="notes-list">
 
-            {revisionNotes.map(
-              (note, index) => (
+            {revisionNotes.length > 0 ? (
 
-                <div
-                  className="note-item"
-                  key={index}
-                >
+              revisionNotes.map(
+                (note, index) => {
 
-                  <span>
-                    {index + 1}
-                  </span>
+                  let noteText;
 
-                  <p>
-                    {note}
-                  </p>
+                  if (typeof note === "string") {
+                    noteText = note;
+                  } else if (note?.note) {
+                    noteText = note.note;
+                  } else if (note?.text) {
+                    noteText = note.text;
+                  } else if (note?.content) {
+                    noteText = note.content;
+                  } else {
+                    noteText = "Revision point";
+                  }
 
-                </div>
+                  return (
+                    <div
+                      className="note-item"
+                      key={index}
+                    >
 
+                      <span>
+                        {index + 1}
+                      </span>
+
+                      <p>
+                        {noteText}
+                      </p>
+
+                    </div>
+                  );
+                }
               )
+
+            ) : (
+
+              <p>
+                No revision notes available.
+              </p>
+
             )}
 
           </div>
@@ -227,7 +385,10 @@ function Dashboard() {
         </div>
 
 
-        {/* STUDY PLAN */}
+        {/* =================================================
+            STUDY PLAN
+        ================================================= */}
+
         <div className="content-panel">
 
           <span className="section-label">
@@ -241,42 +402,174 @@ function Dashboard() {
 
           <div className="plan-list">
 
-            {studyPlan.map(
-              (day, index) => (
+            {studyPlan.length > 0 ? (
 
-                <div
-                  className="plan-item"
-                  key={index}
-                >
+              studyPlan.map(
+                (day, index) => {
 
-                  <div className="day-number">
-                    {index + 1}
-                  </div>
+                  /*
+                    The backend may return:
+
+                    {
+                      day: 1,
+                      topics: ["Topic A", "Topic B"],
+                      hours: 2
+                    }
+
+                    OR:
+
+                    {
+                      day: "Day 1",
+                      topics: [...],
+                      hours: 2
+                    }
+
+                    OR slightly different key names.
+
+                    We handle all of them here.
+                  */
 
 
-                  <div>
+                  // -------------------------------
+                  // DAY
+                  // -------------------------------
 
-                    <strong>
-                      {day.day}
-                    </strong>
-
-
-                    {Array.isArray(day.topics) && (
-                      <p>
-                        {day.topics.join(" • ")}
-                      </p>
-                    )}
-
-                  </div>
+                  const dayValue =
+                    day?.day ??
+                    day?.day_number ??
+                    day?.dayNumber ??
+                    index + 1;
 
 
-                  <span>
-                    {day.hours}h
-                  </span>
+                  // -------------------------------
+                  // TOPICS
+                  // -------------------------------
 
-                </div>
+                  let topics = [];
 
+                  if (
+                    Array.isArray(day?.topics)
+                  ) {
+                    topics = day.topics;
+                  } else if (
+                    Array.isArray(day?.subjects)
+                  ) {
+                    topics = day.subjects;
+                  } else if (
+                    Array.isArray(day?.content)
+                  ) {
+                    topics = day.content;
+                  }
+
+
+                  // -------------------------------
+                  // HOURS
+                  // -------------------------------
+
+                  const hours =
+                    day?.hours ??
+                    day?.study_hours ??
+                    day?.studyHours ??
+                    day?.duration ??
+                    "";
+
+
+                  // -------------------------------
+                  // TOPIC TEXT
+                  // -------------------------------
+
+                  const topicText =
+                    topics
+                      .map((topic) => {
+
+                        if (
+                          typeof topic === "string"
+                        ) {
+                          return topic;
+                        }
+
+                        if (topic?.topic) {
+                          return topic.topic;
+                        }
+
+                        if (topic?.title) {
+                          return topic.title;
+                        }
+
+                        if (topic?.name) {
+                          return topic.name;
+                        }
+
+                        return "";
+
+                      })
+                      .filter(Boolean)
+                      .join(" • ");
+
+
+                  return (
+
+                    <div
+                      className="plan-item"
+                      key={index}
+                    >
+
+                      {/* DAY NUMBER */}
+
+                      <div className="day-number">
+
+                        {index + 1}
+
+                      </div>
+
+
+                      {/* DAY CONTENT */}
+
+                      <div className="plan-content">
+
+                        <strong>
+
+                          {typeof dayValue === "string"
+                            ? dayValue
+                            : `Day ${dayValue}`}
+
+                        </strong>
+
+
+                        {topicText && (
+
+                          <p>
+                            {topicText}
+                          </p>
+
+                        )}
+
+                      </div>
+
+
+                      {/* HOURS */}
+
+                      {hours !== "" && (
+
+                        <span>
+                          {hours}h
+                        </span>
+
+                      )}
+
+                    </div>
+
+                  );
+
+                }
               )
+
+            ) : (
+
+              <p>
+                No study plan available.
+              </p>
+
             )}
 
           </div>
@@ -286,7 +579,10 @@ function Dashboard() {
       </section>
 
 
-      {/* MCQ QUIZ */}
+      {/* =====================================================
+          MCQ QUIZ
+      ===================================================== */}
+
       <section className="content-panel mcq-panel">
 
         <span className="section-label">
@@ -298,43 +594,70 @@ function Dashboard() {
         </h2>
 
 
-        {mcqQuiz.map(
-          (mcq, index) => (
+        {mcqQuiz.length > 0 ? (
 
-            <div
-              className="mcq"
-              key={index}
-            >
+          mcqQuiz.map(
+            (mcq, index) => (
 
-              <strong>
-                {index + 1}. {mcq.question}
-              </strong>
+              <div
+                className="mcq"
+                key={index}
+              >
+
+                <strong>
+
+                  {index + 1}.{" "}
+
+                  {mcq?.question ||
+                    mcq?.text ||
+                    "Question"}
+
+                </strong>
 
 
-              <div className="options">
+                <div className="options">
 
-                {Array.isArray(mcq.options) &&
-                  mcq.options.map(
-                    (option, optionIndex) => (
+                  {Array.isArray(
+                    mcq?.options
+                  ) &&
 
-                      <div
-                        key={optionIndex}
-                      >
-                        {String.fromCharCode(
-                          65 + optionIndex
-                        )}
-                        .{" "}
-                        {option}
-                      </div>
+                    mcq.options.map(
+                      (
+                        option,
+                        optionIndex
+                      ) => (
 
-                    )
-                  )}
+                        <div
+                          key={optionIndex}
+                        >
+
+                          {String.fromCharCode(
+                            65 + optionIndex
+                          )}
+
+                          .{" "}
+
+                          {option}
+
+                        </div>
+
+                      )
+                    )}
+
+                </div>
 
               </div>
 
-            </div>
+            )
 
           )
+
+        ) : (
+
+          <p>
+            No MCQ questions available.
+          </p>
+
         )}
 
       </section>
