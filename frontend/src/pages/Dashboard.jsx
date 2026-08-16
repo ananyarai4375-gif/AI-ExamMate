@@ -91,6 +91,7 @@ function Dashboard() {
     ? analysis.study_plan
     : [];
   console.log("STUDY PLAN FROM API:", studyPlan);
+  console.log("FIRST STUDY PLAN ITEM:", studyPlan[0]);
 
   const mcqQuiz = Array.isArray(
     analysis.mcq_quiz
